@@ -70,7 +70,7 @@ func (l *nvmllib) GetGPUDeviceEdits(d device.Device) (*cdi.ContainerEdits, error
 // byPathHookDiscoverer discovers the entities required for injecting by-path DRM device links
 type byPathHookDiscoverer struct {
 	logger        logger.Interface
-	driverRoot    string
+	devRoot       string
 	nvidiaCTKPath string
 	pciBusID      string
 	deviceNodes   discover.Discover
@@ -79,7 +79,7 @@ type byPathHookDiscoverer struct {
 var _ discover.Discover = (*byPathHookDiscoverer)(nil)
 
 // newFullGPUDiscoverer creates a discoverer for the full GPU defined by the specified device.
-func newFullGPUDiscoverer(logger logger.Interface, driverRoot string, nvidiaCTKPath string, d device.Device) (discover.Discover, error) {
+func newFullGPUDiscoverer(logger logger.Interface, devRoot string, nvidiaCTKPath string, d device.Device) (discover.Discover, error) {
 	// TODO: The functionality to get device paths should be integrated into the go-nvlib/pkg/device.Device interface.
 	// This will allow reuse here and in other code where the paths are queried such as the NVIDIA device plugin.
 	minor, ret := d.GetMinorNumber()
@@ -104,12 +104,12 @@ func newFullGPUDiscoverer(logger logger.Interface, driverRoot string, nvidiaCTKP
 	deviceNodes := discover.NewCharDeviceDiscoverer(
 		logger,
 		deviceNodePaths,
-		driverRoot,
+		devRoot,
 	)
 
 	byPathHooks := &byPathHookDiscoverer{
 		logger:        logger,
-		driverRoot:    driverRoot,
+		devRoot:       devRoot,
 		nvidiaCTKPath: nvidiaCTKPath,
 		pciBusID:      pciBusID,
 		deviceNodes:   deviceNodes,
@@ -117,7 +117,7 @@ func newFullGPUDiscoverer(logger logger.Interface, driverRoot string, nvidiaCTKP
 
 	deviceFolderPermissionHooks := newDeviceFolderPermissionHookDiscoverer(
 		logger,
-		driverRoot,
+		devRoot,
 		nvidiaCTKPath,
 		deviceNodes,
 	)
@@ -189,7 +189,7 @@ func (d *byPathHookDiscoverer) deviceNodeLinks() ([]string, error) {
 
 	var links []string
 	for _, c := range candidates {
-		linkPath := filepath.Join(d.driverRoot, c)
+		linkPath := filepath.Join(d.devRoot, c)
 		device, err := os.Readlink(linkPath)
 		if err != nil {
 			d.logger.Warningf("Failed to evaluate symlink %v; ignoring", linkPath)

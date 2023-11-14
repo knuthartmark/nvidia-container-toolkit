@@ -38,6 +38,7 @@ func NewGraphicsModifier(logger logger.Interface, cfg *config.Config, image imag
 		logger,
 		image.DevicesFromEnvvars(visibleDevicesEnvvar),
 		cfg.NVIDIAContainerCLIConfig.Root,
+		cfg.NVIDIAContainerCLIConfig.Root,
 		cfg.NVIDIACTKConfig.Path,
 	)
 	if err != nil {
