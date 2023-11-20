@@ -45,6 +45,7 @@ type options struct {
 	format             string
 	deviceNameStrategy string
 	driverRoot         string
+	devRoot            string
 	nvidiaCTKPath      string
 	mode               string
 	vendor             string
@@ -111,6 +112,11 @@ func (m command) build() *cli.Command {
 			Name:        "driver-root",
 			Usage:       "Specify the NVIDIA GPU driver root to use when discovering the entities that should be included in the CDI specification.",
 			Destination: &opts.driverRoot,
+		},
+		&cli.StringFlag{
+			Name:        "dev-root",
+			Usage:       "Specify the root where `/dev` is located. If this is not specified, the driver-root is assumed.",
+			Destination: &opts.devRoot,
 		},
 		&cli.StringSliceFlag{
 			Name:        "library-search-path",
@@ -236,6 +242,7 @@ func (m command) generateSpec(opts *options) (spec.Interface, error) {
 	cdilib, err := nvcdi.New(
 		nvcdi.WithLogger(m.logger),
 		nvcdi.WithDriverRoot(opts.driverRoot),
+		nvcdi.WithDevRoot(opts.devRoot),
 		nvcdi.WithNVIDIACTKPath(opts.nvidiaCTKPath),
 		nvcdi.WithDeviceNamer(deviceNamer),
 		nvcdi.WithMode(opts.mode),
